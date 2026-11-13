@@ -69,3 +69,7 @@ The notebook was developed for a Kaggle environment with GPU support. Review the
 
 ---
 **Scope note:** This is an educational research project on benchmark robustness, not evidence of deployment-ready performance or a comprehensive fairness audit.
+
+## Implementation audit
+
+See [REPRODUCIBILITY_AUDIT.md](REPRODUCIBILITY_AUDIT.md) for the current review of the training/evaluation pipeline and the outstanding source-code dependency. The audit is partial until the exact `erm/` source files used for the recorded run are included in this repository.
