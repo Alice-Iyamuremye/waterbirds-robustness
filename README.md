@@ -1,117 +1,71 @@
-# 🐦 Spurious Background Reliance in Bird Classification
+# Spurious Background Reliance in Bird Classification
 
-**Detecting and Mitigating Background Shortcuts with ERM and Group DRO on the Waterbirds Benchmark**
+**Evaluating ERM and Group DRO on the WILDS Waterbirds benchmark**
 
-[![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://python.org)
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.10-ee4c2c)](https://pytorch.org)
-[![WILDS](https://img.shields.io/badge/WILDS-Waterbirds-green)](https://wilds.stanford.edu)
+This project investigates whether empirical risk minimization (ERM) performs unevenly across bird–background subgroups and evaluates Group Distributionally Robust Optimization (Group DRO) as a mitigation approach.
 
----
+## Recorded results
 
-## 📌 Overview
+The table below reproduces the saved test-evaluation results in `project15ml.ipynb`. These are the recorded outputs of this project run, not results from a multi-seed study.
 
-Image classifiers often take shortcuts. Instead of learning what a bird **looks like**, they learn what **background** the bird usually sits on. A duck on water? → "Waterbird." That same duck on grass? → "Landbird" (wrong).
+| Method | Average accuracy | Worst-group accuracy | Average–worst gap |
+|---|---:|---:|---:|
+| ERM | 83.07% | 62.62% | 20.45 pp |
+| Group DRO | 86.36% | 74.77% | 11.59 pp |
 
-This project demonstrates the problem and a fix:
+Group DRO's recorded worst-group accuracy is **12.15 percentage points higher** than ERM's; average accuracy is **3.29 points higher**.
 
-1. **ERM** (standard training) — exploits the background shortcut, producing a **20.45 percentage point gap** between average and worst-group accuracy.
-2. **Group DRO** (robust training) — forces the model to care about rare, hard cases, cutting the gap in **half**.
+### Test accuracy by subgroup
 
----
+| Subgroup | ERM | Group DRO | Difference |
+|---|---:|---:|---:|
+| Landbird on land | 98.63% | 94.28% | −4.35 pp |
+| Landbird on water | 75.88% | 85.41% | +9.53 pp |
+| Waterbird on land | 62.62% | 74.77% | +12.15 pp |
+| Waterbird on water | 95.17% | 90.97% | −4.20 pp |
 
-## 📊 Headline Results
+The largest improvement is on waterbird-on-land, the worst-performing subgroup under ERM. Group DRO does not improve every subgroup: accuracy is lower on the two majority subgroups in these recorded results.
 
-| Method       | Average Accuracy | Worst-Group Accuracy | Gap      |
-|--------------|-----------------|---------------------|----------|
-| **ERM**      | 83.07%          | 62.62%              | 20.45 pp |
-| **Group DRO**| **86.36%**      | **74.77%**          | **11.59 pp** |
+## Dataset and approach
 
-✅ **Worst-group improvement:** +12.15 percentage points  
-✅ **Average improvement:** +3.29 percentage points
+- **Dataset:** WILDS Waterbirds, 11,788 images.
+- **Official split sizes:** 4,795 train / 1,199 validation / 5,794 test.
+- **Groups:** four combinations of bird type (landbird/waterbird) and background (land/water).
+- **Backbone:** ImageNet-pretrained ResNet-18 with a two-class classification head (11,177,538 parameters in the notebook's model-build check).
+- **Methods:** ERM and Group DRO, with subgroup labels used by Group DRO during training.
+- **Checkpoint selection:** validation worst-group accuracy, as described in the notebook.
+- **Analysis:** average and worst-group accuracy, subgroup-level accuracy, training curves, and Grad-CAM visualizations.
 
----
+## Interpretation and limitations
 
-## 📁 Dataset — Waterbirds (WILDS)
+The recorded subgroup results are consistent with a robustness benefit from Group DRO on the minority groups in this run. They do not, by themselves, establish that the models causally rely on background features or that Group DRO will generalize to other datasets.
 
-- **11,788** images of birds
-- **2 classes:** landbird, waterbird
-- **4 subgroups:** bird type × background (land/water)
-- **Deliberately biased:** ~95% of training data has the "expected" background → strong spurious correlation
+Grad-CAM is used here as a **qualitative visualization aid**. Saliency maps can suggest which image regions contribute to a prediction, but they do not prove causal feature reliance or establish that a model has stopped using background information.
 
-| Subgroup | Train % | Role |
-|----------|---------|------|
-| Landbird on land | 73.0% | Majority (easy) |
-| Landbird on water | 3.8% | Minority (hard) |
-| Waterbird on land | 1.2% | **Minority (hardest)** |
-| Waterbird on water | 22.0% | Majority (easy) |
+Important limitations:
+- Results represent a single recorded experiment; no multi-seed mean, standard deviation, or confidence interval is reported.
+- Only one benchmark dataset and one backbone (ResNet-18) are evaluated.
+- Group DRO depends on group labels during training.
+- The four subgroup results show trade-offs: Group DRO improves the two minority-group accuracies while reducing accuracy on the two majority groups in this run.
+- The notebook's environment setup is Kaggle-specific and expects the required dataset/source files and artifacts.
 
----
+## Repository contents
 
-## 🧠 Methods
+- `project15ml.ipynb` — experiment workflow, saved outputs, evaluation, and visualizations.
+- `report.md` — written project report.
+- `erm_best_saliency-2.png`, `groupdro_best_saliency.png` — saved saliency visualizations.
 
-### ERM (Empirical Risk Minimization)
-- Standard training — every image gets equal weight
-- On biased data, ERM minimizes average loss by exploiting the shortcut
-- **Baseline** — represents "do nothing special"
+## Running the notebook
 
-### Group DRO (Distributionally Robust Optimization)
-- Maintains per-group weights updated via dual ascent
-- Automatically upweights groups with higher loss (the rare, hard cases)
-- Forces the model to perform well on **all** subgroups, not just the majority
+The notebook was developed for a Kaggle environment with GPU support. Review the setup cell before execution: it installs WILDS, retrieves the Waterbirds dataset when needed, and expects the project's ERM source files to be available through the Kaggle input attachment described in the notebook. Training can take substantially longer than simply reviewing the saved outputs.
 
-**Architecture:** Both models use ResNet-18 pretrained on ImageNet (11.2M parameters).
+## References
 
----
-
-## 📈 Per-Subgroup Breakdown
-
-| Subgroup | ERM | Group DRO | Delta |
-|----------|-----|-----------|-------|
-| Landbird-on-land | 98.63% | 94.28% | **−4.35 pp** |
-| Landbird-on-water | 75.88% | 85.41% | **+9.53 pp** |
-| **Waterbird-on-land** ⚠️ | **62.62%** | **74.77%** | **+12.15 pp** |
-| Waterbird-on-water | 95.17% | 90.97% | **−4.20 pp** |
-
-The biggest win is **waterbird-on-land** (+12.15 pp) — the subgroup with only **56 training examples**. Group DRO also dramatically improved **landbird-on-water** (+9.53 pp).
+1. Sagawa et al. (2020), *Distributionally Robust Neural Networks for Group Shifts*, ICLR. https://arxiv.org/abs/1911.08731
+2. Koh et al. (2021), *WILDS: A Benchmark of in-the-Wild Distribution Shifts*, ICML. https://arxiv.org/abs/2012.07421
+3. Selvaraju et al. (2017), *Grad-CAM: Visual Explanations from Deep Networks via Gradient-based Localization*, ICCV.
+4. He et al. (2016), *Deep Residual Learning for Image Recognition*, CVPR.
+5. Wah et al. (2011), *The Caltech-UCSD Birds-200-2011 Dataset*, California Institute of Technology.
 
 ---
-
-## 🔍 Visual Evidence (Grad-CAM)
-
-Grad-CAM heatmaps show **where the model looks** when classifying:
-
-- **ERM** — attention is biased toward the **background** for minority subgroups (especially waterbird-on-land), confirming shortcut learning.
-- **Group DRO** — attention is consistently centered on the **bird itself**, proving it learned actual features.
-
----
-
-## 🛠️ How to Run
-
-```bash
-# 1. Clone the repo
-git clone https://github.com/your-username/waterbirds-robustness.git
-cd waterbirds-robustness
-
-# 2. Install dependencies
-pip install torch torchvision wilds matplotlib
-
-# 3. Run the notebook
-jupyter notebook waterbirds_project.ipynb
-```
-
-> ⏱ Training takes ~40 min per model on a single GPU (Tesla T4).  
-> If checkpoints exist, training is skipped automatically.
-
----
-
-## 📚 References
-
-1. Sagawa et al. (2020) — *Distributionally Robust Neural Networks for Group Shifts* — [arXiv:1911.08731](https://arxiv.org/abs/1911.08731)
-2. Koh et al. (2021) — *WILDS: A Benchmark of in-the-Wild Distribution Shifts* — [arXiv:2012.07421](https://arxiv.org/abs/2012.07421)
-3. Selvaraju et al. (2017) — *Grad-CAM: Visual Explanations from Deep Networks* — ICCV 2017
-
----
-
-## 📝 License
-
-This project is for educational and research purposes.
+**Scope note:** This is an educational research project on benchmark robustness, not evidence of deployment-ready performance or a comprehensive fairness audit.
