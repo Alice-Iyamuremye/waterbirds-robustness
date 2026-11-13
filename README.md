@@ -8,12 +8,12 @@ This project investigates whether empirical risk minimization (ERM) performs une
 
 The table below reproduces the saved test-evaluation results in `project15ml.ipynb`. These are the recorded outputs of this project run, not results from a multi-seed study.
 
-| Method | Average accuracy | Worst-group accuracy | Average–worst gap |
+| Method | Macro-average subgroup accuracy | Worst-group accuracy | Average–worst gap |
 |---|---:|---:|---:|
 | ERM | 83.07% | 62.62% | 20.45 pp |
 | Group DRO | 86.36% | 74.77% | 11.59 pp |
 
-Group DRO's recorded worst-group accuracy is **12.15 percentage points higher** than ERM's; average accuracy is **3.29 points higher**.
+Group DRO's recorded worst-group accuracy is **12.15 percentage points higher** than ERM's; macro-average subgroup accuracy is **3.29 points higher**.
 
 ### Test accuracy by subgroup
 
@@ -34,7 +34,7 @@ The largest improvement is on waterbird-on-land, the worst-performing subgroup u
 - **Backbone:** ImageNet-pretrained ResNet-18 with a two-class classification head (11,177,538 parameters in the notebook's model-build check).
 - **Methods:** ERM and Group DRO, with subgroup labels used by Group DRO during training.
 - **Checkpoint selection:** validation worst-group accuracy, as described in the notebook.
-- **Analysis:** average and worst-group accuracy, subgroup-level accuracy, training curves, and Grad-CAM visualizations.
+- **Analysis:** macro-average subgroup and worst-group accuracy, subgroup-level accuracy, training curves, and Grad-CAM visualizations.
 
 ## Interpretation and limitations
 
@@ -47,7 +47,7 @@ Important limitations:
 - Only one benchmark dataset and one backbone (ResNet-18) are evaluated.
 - Group DRO depends on group labels during training.
 - The four subgroup results show trade-offs: Group DRO improves the two minority-group accuracies while reducing accuracy on the two majority groups in this run.
-- The notebook's environment setup is Kaggle-specific and expects the required dataset/source files and artifacts.
+- The notebook's environment setup is Kaggle-specific and expects the Waterbirds dataset and experiment artifacts.
 
 ## Repository contents
 
@@ -57,7 +57,7 @@ Important limitations:
 
 ## Running the notebook
 
-The notebook was developed for a Kaggle environment with GPU support. Review the setup cell before execution: it installs WILDS, retrieves the Waterbirds dataset when needed, and expects the project's ERM source files to be available through the Kaggle input attachment described in the notebook. Training can take substantially longer than simply reviewing the saved outputs.
+The notebook was developed for a Kaggle environment with GPU support. Review the setup cell before execution: it installs WILDS, retrieves the Waterbirds dataset when needed, and uses the version-controlled `erm/` package in this repository. Training can take substantially longer than simply reviewing the saved outputs.
 
 ## References
 
@@ -72,4 +72,9 @@ The notebook was developed for a Kaggle environment with GPU support. Review the
 
 ## Implementation audit
 
-See [REPRODUCIBILITY_AUDIT.md](REPRODUCIBILITY_AUDIT.md) for the current review of the training/evaluation pipeline and the outstanding source-code dependency. The audit is partial until the exact `erm/` source files used for the recorded run are included in this repository.
+See [REPRODUCIBILITY_AUDIT.md](REPRODUCIBILITY_AUDIT.md) for the current review of the training/evaluation pipeline and the outstanding source-code dependency. The supplied Kaggle source files are now included under `erm/`; see the audit for differences between the historical implementation and the reviewed implementation.
+
+
+## Metric definitions
+
+The saved historical notebook output labels the unweighted mean of the four subgroup accuracies as “Average”. In this repository it is described more precisely as **macro-average subgroup accuracy**. It is not sample-weighted test accuracy. The revised `erm/evaluate.py` reports both metrics separately, with `overall_accuracy` defined as sample-weighted accuracy and `macro_group_accuracy` defined as the unweighted mean across observed groups. The historical notebook values are retained as recorded and are not retroactively recalculated from rounded percentages.
