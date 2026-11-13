@@ -129,10 +129,7 @@ The second biggest improvement is **landbird-on-water** (+9.53 pp), showing Grou
 
 ### 5.3 Visual Evidence: Grad-CAM Saliency
 
-The Grad-CAM heatmaps provide qualitative evidence:
-
-- **ERM model:** Attention is biased toward the **background** for minority subgroups (especially waterbird-on-land), confirming the model uses the background as a signal.
-- **Group DRO model:** Attention is more consistently centered on the **bird itself** across all subgroups, indicating it has learned actual bird features rather than background cues.
+The saved Grad-CAM heatmaps are used as qualitative visualizations of regions contributing to model predictions. They may help formulate hypotheses about bird-versus-background attention, but saliency maps do not establish causal feature reliance and cannot confirm that a model has stopped using background cues. The visualizations should therefore be interpreted alongside the quantitative subgroup results, not as proof of shortcut learning or its removal.
 
 ### 5.4 Training Dynamics
 
@@ -155,11 +152,11 @@ After Group DRO, waterbird-on-land improves to 74.77%, but **25.23% of those exa
 
 | Limitation | Explanation |
 |------------|-------------|
-| Single backbone | Only ResNet-18 tested. ViT or larger ConvNets may behave differently. |
+| Single backbone | Only ResNet-18 tested. Vision Transformers or other ConvNets may behave differently. |
 | Single dataset | Waterbirds is one benchmark. Conclusions should be validated on CelebA, CivilComments, etc. |
 | Single mitigation | Only Group DRO compared. Other methods (IRM, CORAL, reweighting) could provide additional baselines. |
 | Group labels required | Group DRO needs group labels during training, which may not be available in real-world settings. |
-| Saliency resolution | Grad-CAM produces 7×7 heatmaps from layer4. Higher-resolution methods would give more detail. |
+| Saliency interpretation | Grad-CAM is qualitative and does not prove causal reliance on image regions; the reported 7×7 layer4 maps are also spatially coarse. |
 
 ### What Could Be Improved
 
@@ -175,20 +172,20 @@ After Group DRO, waterbird-on-land improves to 74.77%, but **25.23% of those exa
 This project demonstrated three key findings:
 
 1. **ERM exploits background shortcuts** in the Waterbirds dataset, producing a 20.45-percentage-point gap between average (83.07%) and worst-group (62.62%) accuracy.
-2. **Grad-CAM saliency maps visually confirm** the shortcut: ERM attends to the background (especially for minority subgroups) rather than the bird itself.
+2. **Grad-CAM provides qualitative visualizations** that can be inspected for possible bird/background attention patterns; it does not prove causal shortcut reliance.
 3. **Group DRO closes this gap dramatically**, improving worst-group accuracy to 74.77% (a **+12.15 pp gain**) while also improving average accuracy to 86.36%.
 
 ### Answer to the Original Research Questions
 
 **Yes, ERM exploits background shortcuts, and yes, Group DRO effectively mitigates this failure mode.**
 
-The findings reproduce the central result of the WILDS benchmark paper (Sagawa et al., 2019): standard training on biased data leads to shortcut learning, and group-robust optimization is an effective mitigation.
+The recorded results are consistent with the motivation for group-robust optimization on a deliberately imbalanced benchmark. Because this is a single recorded experiment on one dataset and backbone, it should not be described as an independent reproduction or general proof of mitigation.
 
 ### Practical Implications
 
 - Models deployed in real-world settings should be evaluated on **worst-group accuracy**, not just average accuracy.
 - When training data is biased, consider using **group-robust optimization** methods like Group DRO.
-- **Visualization** (Grad-CAM, attention maps) is essential for diagnosing whether models use the right features.
+- **Visualization** (including Grad-CAM) can support qualitative error analysis, but should be combined with quantitative tests and should not be treated as causal evidence on its own.
 
 ---
 
