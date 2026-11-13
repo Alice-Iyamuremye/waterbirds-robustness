@@ -109,35 +109,35 @@ Following the WILDS protocol, the headline metric is the **accuracy on the worst
 
 | Method | Average | Worst-Group | Gap |
 |--------|---------|-------------|-----|
-| **ERM** | **83.07%** | **62.62%** | **20.45 pp** |
-| **Group DRO** | **86.36%** | **74.77%** | **11.59 pp** |
+| **ERM** | **82.98%** | **63.55%** | **19.43 pp** |
+| **Group DRO** | **86.13%** | **73.99%** | **12.14 pp** |
 
-**Key result:** Group DRO improves worst-group accuracy by **+12.15 percentage points** (from 62.62% to 74.77%) while also improving average accuracy by **+3.29 points**.
+**Key result:** Group DRO improves worst-group accuracy by **+10.44 percentage points** (from 63.55% to 73.99%) while also improving average accuracy by **+3.15 points**.
 
 ### 5.2 Per-Subgroup Breakdown
 
 | Subgroup | ERM | Group DRO | Delta |
 |----------|-----|-----------|-------|
-| Landbird-on-land (majority) | 98.63% | 94.28% | −4.35 pp |
-| Landbird-on-water (minority) | 75.88% | 85.41% | **+9.53 pp** |
-| **Waterbird-on-land (minority)** | **62.62%** | **74.77%** | **+12.15 pp** |
-| Waterbird-on-water (majority) | 95.17% | 90.97% | −4.20 pp |
+| Landbird-on-land (majority) | 98.54% | 94.15% | −4.39 pp |
+| Landbird-on-water (minority) | 74.81% | 84.97% | **+10.16 pp** |
+| **Waterbird-on-land (minority)** | **63.55%** | **73.99%** | **+10.44 pp** |
+| Waterbird-on-water (majority) | 95.02% | 91.43% | −3.58 pp |
 
-The biggest improvement is on **waterbird-on-land** (+12.15 pp), the subgroup where ERM failed most. This subgroup has the **fewest training examples** (~56 images), making it the hardest case for ERM but exactly what Group DRO targets.
+The biggest improvement is on **waterbird-on-land** (+10.44 pp), the subgroup where ERM failed most. This subgroup has the **fewest training examples** (~56 images), making it the hardest case for ERM but exactly what Group DRO targets.
 
-The second biggest improvement is **landbird-on-water** (+9.53 pp), showing Group DRO helps both minority groups significantly.
+The second biggest improvement is **landbird-on-water** (+10.16 pp), showing Group DRO helps both minority groups significantly.
 
 ### 5.3 Visual Evidence: Grad-CAM Saliency
 
 The Grad-CAM heatmaps provide qualitative evidence:
 
-- **ERM model:** Attention is biased toward the **background** for minority subgroups (especially waterbird-on-land), confirming the model uses the background as a signal.
-- **Group DRO model:** Attention is more consistently centered on the **bird itself** across all subgroups, indicating it has learned actual bird features rather than background cues.
+- **ERM model:** The inspected heatmaps suggest attention to background regions for some minority-subgroup examples. This is qualitative evidence only; Grad-CAM does not establish that background features caused the predictions.
+- **Group DRO model:** The inspected heatmaps appear more centered on bird regions in some examples. This is qualitative evidence and does not prove that the model relies only on bird features.
 
 ### 5.4 Training Dynamics
 
 - **ERM:** Quickly drives train loss to ~0.0001 (severe overfitting) but val worst-group accuracy plateaus around 0.50–0.70.
-- **Group DRO:** Has higher train loss but achieves much better worst-group validation accuracy (best: 0.7293 vs ERM's 0.5940), demonstrating the trade-off works as intended.
+- **Group DRO:** Has higher train loss but achieves much better worst-group validation accuracy (best: 0.7368 vs ERM's 0.5940), demonstrating the trade-off works as intended.
 
 ---
 
@@ -145,7 +145,7 @@ The Grad-CAM heatmaps provide qualitative evidence:
 
 ### Where Group DRO Still Fails
 
-After Group DRO, waterbird-on-land improves to 74.77%, but **25.23% of those examples are still misclassified** (roughly 162 out of 642 test images). Possible reasons:
+After Group DRO, waterbird-on-land improves to 73.99%, but **26.01% of those examples are still misclassified** (roughly 167 out of 642 test images). Possible reasons:
 
 - **Insufficient training examples:** Waterbird-on-land has only ~56 training examples — even with upweighting, the model sees very few examples.
 - **Strong visual similarity:** Some waterbird species (e.g., cormorants on rocks) genuinely look similar to landbirds when on land backgrounds.
@@ -174,13 +174,13 @@ After Group DRO, waterbird-on-land improves to 74.77%, but **25.23% of those exa
 
 This project demonstrated three key findings:
 
-1. **ERM exploits background shortcuts** in the Waterbirds dataset, producing a 20.45-percentage-point gap between average (83.07%) and worst-group (62.62%) accuracy.
+1. **ERM exploits background shortcuts** in the Waterbirds dataset, producing a 20.45-percentage-point gap between average (82.98%) and worst-group (63.55%) accuracy.
 2. **Grad-CAM saliency maps visually confirm** the shortcut: ERM attends to the background (especially for minority subgroups) rather than the bird itself.
-3. **Group DRO closes this gap dramatically**, improving worst-group accuracy to 74.77% (a **+12.15 pp gain**) while also improving average accuracy to 86.36%.
+3. **Group DRO closes this gap dramatically**, improving worst-group accuracy to 73.99% (a **+10.44 pp gain**) while also improving average accuracy to 86.13%.
 
 ### Answer to the Original Research Questions
 
-**Yes, ERM exploits background shortcuts, and yes, Group DRO effectively mitigates this failure mode.**
+The saved test outputs are consistent with ERM performing less well on the waterbird-on-land subgroup and Group DRO improving worst-group performance in this experiment. They do not by themselves establish that ERM causally relies on background features or that Group DRO eliminates shortcut learning.
 
 The findings reproduce the central result of the WILDS benchmark paper (Sagawa et al., 2019): standard training on biased data leads to shortcut learning, and group-robust optimization is an effective mitigation.
 
