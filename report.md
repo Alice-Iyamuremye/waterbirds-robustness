@@ -107,12 +107,12 @@ Following the WILDS protocol, the headline metric is the **accuracy on the worst
 
 ### 5.1 Headline Comparison
 
-| Method | Average | Worst-Group | Gap |
+| Method | Macro-average subgroup accuracy | Worst-Group | Gap |
 |--------|---------|-------------|-----|
 | **ERM** | **83.07%** | **62.62%** | **20.45 pp** |
 | **Group DRO** | **86.36%** | **74.77%** | **11.59 pp** |
 
-**Key result:** Group DRO improves worst-group accuracy by **+12.15 percentage points** (from 62.62% to 74.77%) while also improving average accuracy by **+3.29 points**.
+**Key result:** Group DRO improves worst-group accuracy by **+12.15 percentage points** (from 62.62% to 74.77%) while also improving macro-average subgroup accuracy by **+3.29 points**.
 
 ### 5.2 Per-Subgroup Breakdown
 
@@ -171,9 +171,9 @@ After Group DRO, waterbird-on-land improves to 74.77%, but **25.23% of those exa
 
 This project demonstrated three key findings:
 
-1. **ERM exploits background shortcuts** in the Waterbirds dataset, producing a 20.45-percentage-point gap between average (83.07%) and worst-group (62.62%) accuracy.
+1. **ERM exploits background shortcuts** in the Waterbirds dataset, producing a 20.45-percentage-point gap between macro-average subgroup accuracy (83.07%) and worst-group (62.62%) accuracy.
 2. **Grad-CAM provides qualitative visualizations** that can be inspected for possible bird/background attention patterns; it does not prove causal shortcut reliance.
-3. **Group DRO closes this gap dramatically**, improving worst-group accuracy to 74.77% (a **+12.15 pp gain**) while also improving average accuracy to 86.36%.
+3. **Group DRO closes this gap dramatically**, improving worst-group accuracy to 74.77% (a **+12.15 pp gain**) while also improving macro-average subgroup accuracy to 86.36%.
 
 ### Answer to the Original Research Questions
 
@@ -201,7 +201,7 @@ The recorded results are consistent with the motivation for group-robust optimiz
 
 ## Appendix: Reproducibility
 
-The complete pipeline is reproducible:
+The historical notebook records the following pipeline; the revised source code is version-controlled, but a clean rerun is still required before claiming reproducibility:
 
 - **Setup cell:** Downloads data and writes source files (~5 min)
 - **Training:** ERM + Group DRO take ~40 min each on a single GPU (Tesla T4)
@@ -209,3 +209,7 @@ The complete pipeline is reproducible:
 - **Artifacts saved to:** `artifacts/models/`, `artifacts/results/`, `artifacts/saliency/`
 
 The notebook uses a self-healing mechanism: if checkpoint files already exist, training is skipped automatically, allowing quick re-execution of the evaluation and plotting cells.
+
+## Metric clarification
+
+The historical notebook's “Average” column is the unweighted mean of the four subgroup accuracies. It is therefore macro-average subgroup accuracy, not sample-weighted accuracy over all test images. The revised evaluator reports these separately. The historical values above are retained as recorded and should not be treated as results from the revised Group DRO implementation until it has been rerun.
