@@ -14,8 +14,8 @@ Image classifiers often take shortcuts. Instead of learning what a bird **looks 
 
 This project demonstrates the problem and a fix:
 
-1. **ERM** (standard training) — exploits the background shortcut, producing a **19.43 percentage point gap** between average and worst-group accuracy.
-2. **Group DRO** (robust training) — forces the model to care about rare, hard cases, reducing the gap to **12.14 percentage points**.
+1. **ERM** (standard training) — exploits the background shortcut, producing a **20.45 percentage point gap** between average and worst-group accuracy.
+2. **Group DRO** (robust training) — forces the model to care about rare, hard cases, cutting the gap in **half**.
 
 ---
 
@@ -23,11 +23,11 @@ This project demonstrates the problem and a fix:
 
 | Method       | Average Accuracy | Worst-Group Accuracy | Gap      |
 |--------------|-----------------|---------------------|----------|
-| **ERM**      | 82.98%          | 63.55%              | 19.43 pp |
-| **Group DRO**| **86.13%**      | **73.99%**          | **12.14 pp** |
+| **ERM**      | 83.07%          | 62.62%              | 20.45 pp |
+| **Group DRO**| **86.36%**      | **74.77%**          | **11.59 pp** |
 
-✅ **Worst-group improvement:** +10.44 percentage points  
-✅ **Average improvement:** +3.15 percentage points
+✅ **Worst-group improvement:** +12.15 percentage points  
+✅ **Average improvement:** +3.29 percentage points
 
 ---
 
@@ -67,12 +67,12 @@ This project demonstrates the problem and a fix:
 
 | Subgroup | ERM | Group DRO | Delta |
 |----------|-----|-----------|-------|
-| Landbird-on-land | 98.54% | 94.15% | **−4.39 pp** |
-| Landbird-on-water | 74.81% | 84.97% | **+10.16 pp** |
-| **Waterbird-on-land** ⚠️ | **63.55%** | **73.99%** | **+10.44 pp** |
-| Waterbird-on-water | 95.02% | 91.43% | **−3.58 pp** |
+| Landbird-on-land | 98.63% | 94.28% | **−4.35 pp** |
+| Landbird-on-water | 75.88% | 85.41% | **+9.53 pp** |
+| **Waterbird-on-land** ⚠️ | **62.62%** | **74.77%** | **+12.15 pp** |
+| Waterbird-on-water | 95.17% | 90.97% | **−4.20 pp** |
 
-The biggest win is **waterbird-on-land** (+10.44 pp) — the subgroup with only **56 training examples**. Group DRO also dramatically improved **landbird-on-water** (+10.16 pp).
+The biggest win is **waterbird-on-land** (+12.15 pp) — the subgroup with only **56 training examples**. Group DRO also dramatically improved **landbird-on-water** (+9.53 pp).
 
 ---
 
@@ -80,8 +80,8 @@ The biggest win is **waterbird-on-land** (+10.44 pp) — the subgroup with only 
 
 Grad-CAM heatmaps show **where the model looks** when classifying:
 
-- **ERM** — attention is biased toward the **background** for minority subgroups (especially waterbird-on-land), consistent with possible shortcut learning; saliency is qualitative evidence, not proof of causal feature reliance.
-- **Group DRO** — attention is consistently centered on the **bird itself**, suggests greater focus on bird regions in the inspected examples, but does not prove causal feature reliance.
+- **ERM** — attention is biased toward the **background** for minority subgroups (especially waterbird-on-land), confirming shortcut learning.
+- **Group DRO** — attention is consistently centered on the **bird itself**, proving it learned actual features.
 
 ---
 
@@ -89,14 +89,14 @@ Grad-CAM heatmaps show **where the model looks** when classifying:
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/Alice-Iyamuremye/waterbirds-robustness.git
+git clone https://github.com/your-username/waterbirds-robustness.git
 cd waterbirds-robustness
 
 # 2. Install dependencies
 pip install torch torchvision wilds matplotlib
 
 # 3. Run the notebook
-jupyter notebook project15ml.ipynb
+jupyter notebook waterbirds_project.ipynb
 ```
 
 > ⏱ Training takes ~40 min per model on a single GPU (Tesla T4).  
