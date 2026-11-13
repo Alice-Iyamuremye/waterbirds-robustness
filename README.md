@@ -1,94 +1,89 @@
 # Robust Image Classification and Spurious Background Reliance on the WILDS Waterbirds Benchmark
 
-**An experimental study of Empirical Risk Minimization (ERM) and Group Distributionally Robust Optimization (Group DRO) under spurious background correlations.**
+**An experimental comparison of Empirical Risk Minimization (ERM) and Group Distributionally Robust Optimization (Group DRO) under spurious background correlations.**
 
-## Overview
+## Research question
 
-Image classifiers can exploit correlations that are predictive in the training data but unreliable outside it. In the WILDS Waterbirds benchmark, bird class is correlated with background type. This creates a setting in which a model may rely on the background rather than on features of the bird.
+When bird class is spuriously correlated with background in the WILDS Waterbirds benchmark, how does standard ERM perform across the four bird/background groups, and how does Group DRO affect worst-group performance?
 
-This project investigates that problem by personally training and evaluating image-classification models and comparing standard ERM training with a subgroup-aware Group DRO approach.
+## Dataset and task
 
-## Research questions
-
-1. How does standard ERM perform across the Waterbirds subgroups when class and background are spuriously correlated?
-2. Does Group DRO change worst-group performance relative to ERM?
-3. What do subgroup metrics and Grad-CAM visualisations reveal—and not reveal—about model behaviour?
-
-## Dataset
-
-The project uses the **Waterbirds** benchmark from the WILDS benchmark suite.
-
-The task distinguishes landbirds from waterbirds across four groups defined by bird class and background:
+This project uses the Waterbirds benchmark distributed through WILDS. The task classifies images as landbirds or waterbirds. Each example also belongs to one of four groups formed by crossing bird class with background type:
 
 - Landbird on land
 - Landbird on water
 - Waterbird on land
 - Waterbird on water
 
-The minority combinations are particularly important because average accuracy can conceal poor performance on these groups.
-
-Dataset access and licensing are governed by the original dataset and WILDS distribution. Follow the official WILDS instructions rather than committing dataset images to this repository.
+The notebook reports 11,788 examples overall, with 4,795 training, 1,199 validation, and 5,794 test examples. Group membership is used by the Group DRO training procedure and for subgroup evaluation.
 
 ## Methods
 
-### Empirical Risk Minimization (ERM)
+- **ERM:** standard empirical risk minimization baseline.
+- **Group DRO:** group-aware robust optimization that updates group weights to place greater emphasis on higher-loss groups.
+- **Backbone:** ImageNet-pretrained ResNet-18 for both methods.
+- **Visual inspection:** Grad-CAM saliency maps generated for selected examples from each group.
 
-ERM is used as the standard empirical-risk training baseline.
+The notebook trains each method for up to 50 epochs and selects checkpoints using validation worst-group accuracy. The saved notebook output reports a best validation worst-group accuracy of 0.5940 for ERM and 0.7293 for Group DRO.
 
-### Group Distributionally Robust Optimization (Group DRO)
+## Test-set results
 
-Group DRO is used to emphasise higher-loss groups during training, with the aim of improving performance on the most challenging subgroup rather than optimising only aggregate accuracy.
+The following values are taken from the saved test evaluation outputs in the accompanying Kaggle notebook (test set n = 5,794).
 
-### Model and inspection
+| Method | Average accuracy | Worst-group accuracy | Average–worst gap |
+|---|---:|---:|---:|
+| ERM | 83.07% | 62.62% | 20.45 pp |
+| Group DRO | 86.36% | 74.77% | 11.59 pp |
 
-The main experiment documented in this repository uses an ImageNet-pretrained **ResNet-18** backbone. Grad-CAM is used as a qualitative visualisation method to inspect regions associated with model predictions.
+Group DRO improves worst-group accuracy by **12.15 percentage points** and average accuracy by **3.29 percentage points** relative to ERM.
 
-Grad-CAM maps are exploratory evidence about model activations. They do not, by themselves, prove that a model uses a particular causal feature or explain its complete decision process.
+### Per-group test accuracy
 
-## Evaluation
+| Group | ERM | Group DRO | Change |
+|---|---:|---:|---:|
+| Landbird on land | 98.63% | 94.28% | −4.35 pp |
+| Landbird on water | 75.88% | 85.41% | +9.53 pp |
+| Waterbird on land | 62.62% | 74.77% | +12.15 pp |
+| Waterbird on water | 95.17% | 90.97% | −4.20 pp |
 
-The evaluation focuses on:
+The results show a trade-off: Group DRO improves both minority-group accuracies and the worst-group metric, while reducing accuracy on the two majority groups. Overall accuracy alone would not communicate this behaviour.
 
-- Overall test accuracy.
-- Accuracy for each of the four subgroups.
-- Worst-group accuracy.
-- The difference between average and worst-group performance.
-- Qualitative Grad-CAM inspection.
+## Grad-CAM: qualitative inspection
 
-**Numerical results are intentionally not presented in this README while the experiment records are being reconciled.** Earlier versions of the related project repositories contain inconsistent metrics and model descriptions. A headline result should be restored only after the exact run, backbone, checkpoint, evaluation split, and metric calculation have been verified against the source code and saved outputs.
+The notebook generates Grad-CAM visualisations for both trained checkpoints, with two examples per group. These maps can help inspect image regions associated with model predictions. They are qualitative diagnostic artefacts; they do not prove that a model relies on a particular causal feature or establish that shortcut learning has been eliminated.
 
-## Repository contents
+## Reproducing the experiment
 
-The notebook and supporting files in this repository contain the experiment workflow. Review the actual notebook cells and configuration before assuming a particular training command, runtime, or dependency version.
+The Kaggle notebook contains the setup/bootstrap workflow, training calls, evaluation, saliency generation, and comparison code:
 
-## Reproducibility checklist
+- [Kaggle notebook: project15ml](https://www.kaggle.com/code/aliceiyamuremye/project15ml)
 
-Before treating a result as reproducible, record:
+The saved notebook output records the following workflow:
 
-1. Dataset version, split, and group definitions.
-2. Model architecture and pretrained-weight source.
-3. Training configuration, optimiser, learning rate, batch size, epochs, and checkpoint selection.
-4. Group DRO update rule and hyperparameters.
-5. Random seeds and hardware/software environment.
-6. Exact evaluation script and per-group sample counts.
-7. The checkpoint used to produce each reported metric.
-8. Grad-CAM target layer and visualisation procedure.
+1. Set up the WILDS Waterbirds data and project training code in the Kaggle working environment.
+2. Train the ERM model for 50 epochs.
+3. Train the Group DRO model for 50 epochs.
+4. Evaluate both selected checkpoints on the 5,794-example test set.
+5. Generate Grad-CAM maps and compare subgroup metrics.
 
-Do not compare results across runs unless these settings are made explicit.
+The notebook output reports approximately 40 minutes per training run on the configured Kaggle GPU environment. Runtime is hardware- and environment-dependent. The notebook's checkpoint check skips training when the expected checkpoint files already exist; therefore, a fresh reproduction should confirm that both checkpoints were newly generated for the run being reported.
+
+For a fully reproducible release, the repository should also preserve the exact generated training source files, dependency versions, data preparation details, random seeds, and checkpoint-selection configuration. Do not commit the Waterbirds image dataset or large model checkpoints unless licensing and repository storage choices have been reviewed.
 
 ## Limitations
 
-- This is an experimental benchmark study, not evidence of robustness across all image domains.
-- Results on Waterbirds do not establish performance under arbitrary distribution shifts.
-- Worst-group accuracy depends on the benchmark's group definitions and test-set sample sizes.
-- Grad-CAM is a qualitative inspection tool and should not be treated as causal proof.
-- A single backbone and benchmark are insufficient to establish general claims about robust machine learning.
+- This is one benchmark and one backbone; results do not establish robustness across arbitrary distribution shifts.
+- Group DRO depends on group labels being available during training.
+- The test results show gains on the worst-performing groups but losses on the majority groups.
+- The Grad-CAM maps are qualitative and cannot establish causal feature use.
+- The notebook reports a single training run; variation across independent random seeds has not been established here.
+- Additional methods, architectures, and datasets would be needed for broader conclusions.
 
 ## References
 
-- Sagawa, S. et al. (2020). *Distributionally Robust Neural Networks for Group Shifts: On the Importance of Regularization for Worst-Case Generalization.* [arXiv:1911.08731](https://arxiv.org/abs/1911.08731)
-- Koh, P. W. et al. (2021). *WILDS: A Benchmark of in-the-Wild Distribution Shifts.* [arXiv:2012.07421](https://arxiv.org/abs/2012.07421)
-- Selvaraju, R. R. et al. (2017). *Grad-CAM: Visual Explanations from Deep Networks via Gradient-Based Localization.* ICCV.
+- Sagawa, S. et al. (2020). *Distributionally Robust Neural Networks for Group Shifts*. [arXiv:1911.08731](https://arxiv.org/abs/1911.08731)
+- Koh, P. W. et al. (2021). *WILDS: A Benchmark of in-the-Wild Distribution Shifts*. [arXiv:2012.07421](https://arxiv.org/abs/2012.07421)
+- Selvaraju, R. R. et al. (2017). *Grad-CAM: Visual Explanations from Deep Networks via Gradient-Based Localization*. ICCV.
 
 ## Author
 
