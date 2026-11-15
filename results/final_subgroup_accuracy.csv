@@ -1,0 +1,5 @@
+subgroup,ERM_mean,ERM_sd,GroupDRO_mean,GroupDRO_sd,difference_percentage_points
+Landbird on land,98.51,0.32,92.70,1.80,-5.81
+Landbird on water,68.14,0.80,82.20,2.03,14.06
+Waterbird on land,62.93,2.82,81.57,2.13,18.64
+Waterbird on water,95.74,0.24,91.80,1.56,-3.94
