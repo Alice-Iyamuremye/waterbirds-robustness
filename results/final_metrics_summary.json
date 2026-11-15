@@ -1,0 +1,22 @@
+{
+  "project": "Spurious Background Reliance in Bird Classification",
+  "dataset": "WILDS Waterbirds v1.0",
+  "architecture": "ImageNet-pretrained ResNet-18",
+  "methods": ["ERM", "minibatch GroupDRO implementation"],
+  "epochs_per_run": 50,
+  "seeds": [42, 123, 2026],
+  "runs": 6,
+  "checkpoint_selection": "Best checkpoint selected by validation worst-group accuracy; held-out test evaluated after selection",
+  "test_metrics_percent_mean_plus_minus_sample_sd": {
+    "overall_accuracy": {"ERM": "82.44 ± 0.14", "GroupDRO": "87.28 ± 0.36"},
+    "macro_group_accuracy": {"ERM": "81.33 ± 0.47", "GroupDRO": "87.07 ± 0.21"},
+    "worst_group_accuracy": {"ERM": "62.93 ± 2.82", "GroupDRO": "80.82 ± 2.00"}
+  },
+  "limitations": [
+    "Three seeds only; no statistical significance claim.",
+    "GroupDRO is a minibatch implementation and is not claimed as an exact canonical reproduction.",
+    "Grad-CAM is qualitative inspection, not causal evidence.",
+    "Results are specific to the Waterbirds benchmark and do not establish elimination of shortcut reliance."
+  ],
+  "data_note": "These files contain aggregated final results. Per-example predictions, model checkpoints, and full run-level raw outputs are not included."
+}
