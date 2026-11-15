@@ -1,0 +1,4 @@
+metric,ERM_mean,ERM_sd,GroupDRO_mean,GroupDRO_sd,difference_percentage_points
+Overall accuracy,82.44,0.14,87.28,0.36,4.84
+Macro-group accuracy,81.33,0.47,87.07,0.21,5.74
+Worst-group accuracy,62.93,2.82,80.82,2.00,17.89
