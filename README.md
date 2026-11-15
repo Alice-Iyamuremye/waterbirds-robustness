@@ -58,7 +58,7 @@ Grad-CAM is qualitative evidence about class-discriminative regions, not a causa
 
 ## Reproducibility and artifacts
 
-The experiment code and notebook are provided in this repository. The final Kaggle run used six 50-epoch checkpoints. The dataset is not redistributed here; obtain WILDS Waterbirds through the [WILDS project](https://wilds.stanford.edu/datasets/).
+The repository includes an exploratory notebook and experiment documentation. Its embedded historical outputs predate the final six-run Kaggle experiment; the authoritative results are the tables in this README and report.md. The final Kaggle run used six 50-epoch checkpoints. The dataset is not redistributed here; obtain WILDS Waterbirds through the [WILDS project](https://wilds.stanford.edu/datasets/).
 
 The final run produced per-seed JSON test reports and CSV summaries, along with three performance figures and background-stratified confusion matrices. Model checkpoints are large and are not included in this repository.
 
