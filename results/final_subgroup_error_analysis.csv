@@ -1,0 +1,9 @@
+Method,Subgroup,Total predictions,Correct,Errors,Accuracy (%),Error rate (%)
+ERM,Landbird-Land,6765,6664,101,98.51,1.49
+ERM,Landbird-Water,6765,4610,2155,68.14,31.86
+ERM,Waterbird-Land,1926,1212,714,62.93,37.07
+ERM,Waterbird-Water,1926,1844,82,95.74,4.26
+GROUPDRO,Landbird-Land,6765,6271,494,92.70,7.30
+GROUPDRO,Landbird-Water,6765,5561,1204,82.20,17.80
+GROUPDRO,Waterbird-Land,1926,1571,355,81.57,18.43
+GROUPDRO,Waterbird-Water,1926,1768,158,91.80,8.20
