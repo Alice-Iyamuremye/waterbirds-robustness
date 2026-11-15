@@ -1,17 +1,24 @@
 # Final Waterbirds results and figures
 
-This directory contains the aggregated held-out test results from the final three-seed experiment (seeds 42, 123, and 2026; six runs total).
+These files are based on the executed final experiment outputs embedded in the submitted notebook (`project15ml-5.ipynb`). The notebook records six held-out test evaluations: ERM and GroupDRO, each trained with seeds 42, 123, and 2026.
 
-## Files
-- `final_metrics_summary.csv`: overall, macro-group, and worst-group accuracy (mean and sample SD).
-- `final_subgroup_accuracy.csv`: per-subgroup accuracy (mean and sample SD).
-- `final_per_seed_worst_group.csv`: worst-group accuracy for each seed and method.
-- `final_metrics_summary.json`: experiment metadata, headline results, and limitations.
-- `../figures/final_overall_comparison.svg`: overall, macro-group, and worst-group comparison.
-- `../figures/final_subgroup_comparison.svg`: subgroup comparison.
+## Results files
+- `final_metrics_summary.csv`: aggregate overall, macro-group, and worst-group accuracy (mean and sample SD).
+- `final_subgroup_accuracy.csv`: aggregate accuracy for each of the four subgroups.
+- `final_test_results_per_seed.csv`: per-run metrics transcribed from the executed notebook's consolidated results table (reported to four decimal places).
+- `final_subgroup_error_analysis.csv`: pooled subgroup prediction counts, correct predictions, errors, accuracy and error rate from the notebook's subgroup error analysis.
+- `final_per_seed_worst_group.csv`: worst-group accuracy by seed and method.
+- `final_metrics_summary.json`: experiment configuration, headline metrics and reporting limitations.
 
-## Interpretation
-GroupDRO improved mean worst-group accuracy by 17.89 percentage points (62.93% to 80.82%). Gains were concentrated in the two background-mismatched subgroups, while accuracy decreased in the two aligned subgroups. The results are benchmark-specific.
+## Figures
+- `../figures/final_overall_comparison.svg`: mean overall, macro-group and worst-group accuracy with sample-SD error bars.
+- `../figures/final_subgroup_comparison.svg`: mean accuracy for each subgroup.
+- `../figures/final_seed_stability.svg`: worst-group accuracy for each seed and method.
 
-## Reporting cautions
-Three seeds are reported; no statistical significance claim is made. The GroupDRO implementation is minibatch-based and is not presented as an exact canonical reproduction. Grad-CAM is qualitative inspection, not causal evidence. These files contain aggregate results only; raw per-example predictions and model checkpoints are not included.
+## Headline result
+Mean worst-group accuracy increased from 62.93% (ERM) to 80.82% (GroupDRO), a gain of 17.89 percentage points. GroupDRO improved both background-mismatched subgroups while reducing accuracy on the two background-aligned subgroups.
+
+## Method and reporting cautions
+The experiment uses an ImageNet-pretrained ResNet-18 and a minibatch GroupDRO implementation. The notebook's consolidated per-seed table is rounded to four decimal places; aggregate tables report the mean and sample standard deviation across three seeds. No statistical significance claim is made. Grad-CAM is qualitative model-attention inspection, not causal evidence that a model uses or ignores a feature. Results are specific to the WILDS Waterbirds benchmark and do not establish elimination of shortcut reliance or generalization to other datasets.
+
+The notebook includes a Grad-CAM comparison output and confusion-matrix/error-analysis outputs. The per-example predictions and model checkpoint binaries are not included in this repository snapshot; the notebook documents their Kaggle working paths, which are session-specific.
